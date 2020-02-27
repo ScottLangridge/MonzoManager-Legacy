@@ -99,3 +99,13 @@ class MonzoAccount:
     def total_balance(self):
         balance = self._balance()
         return balance['total_balance']
+
+    # Returns the balance in pence of a given pot.
+    def pot_balance(self, pot):
+        url = 'https://api.monzo.com/pots'
+        response = self._get(url)
+        pot_list = response['pots']
+        for p in pot_list:
+            if p['name'] == pot:
+                return p['balance']
+        raise KeyError('Invalid pot name.')
