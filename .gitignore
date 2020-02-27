@@ -1,0 +1,5 @@
+.idea
+venv
+secrets.json
+__pycache__
+debug.py
