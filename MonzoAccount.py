@@ -19,12 +19,13 @@ class MonzoAccount:
         if not self._token_is_valid():
             self._get_new_access_token()
 
-        accounts = self._get('https://api.monzo.com/accounts')
+        accounts = self._get('/accounts')
         self._account_id = accounts['accounts'][0]['id']
         self._user_id = accounts['accounts'][0]['owners'][0]['user_id']
 
     # Makes a get request to the Monzo API.
     def _get(self, url):
+        url = 'https://api.monzo.com' + url
         headers = {'Authorization': 'Bearer %s' % self._token}
         response = requests.get(url, headers=headers)
         if response.status_code != 200:
@@ -35,6 +36,7 @@ class MonzoAccount:
 
     # Makes a post request to the Monzo API.
     def _post(self, url, data):
+        url = 'https://api.monzo.com' + url
         headers = {'Authorization': 'Bearer %s' % self._token}
         response = requests.post(url, data, headers=headers)
         if response.status_code != 200:
@@ -45,7 +47,7 @@ class MonzoAccount:
 
     # Returns a boolean indicating whether of not the currently stored token is valid.
     def _token_is_valid(self):
-        url = 'https://api.monzo.com/ping/whoami'
+        url = '/ping/whoami'
         try:
             response = self._get(url)
         except ConnectionError as ex:
@@ -65,7 +67,7 @@ class MonzoAccount:
         code = input('\nCopy the "code" section of the URL that you are redirected to and paste it here:\n')
         print('\nFetching access token.')
 
-        url = 'https://api.monzo.com/oauth2/token'
+        url = '/oauth2/token'
         data = {
             'grant_type': 'authorization_code',
             'client_id': self._secrets['client_id'],
@@ -87,7 +89,7 @@ class MonzoAccount:
 
     # Calls the balance endpoint of the Monzo API.
     def _balance(self):
-        url = 'https://api.monzo.com/balance?account_id=%s' % self._account_id
+        url = '/balance?account_id=%s' % self._account_id
         return self._get(url)
 
     # Returns the balance in pence in the current account.
@@ -102,7 +104,7 @@ class MonzoAccount:
 
     # Returns the balance in pence of a given pot.
     def pot_balance(self, pot):
-        url = 'https://api.monzo.com/pots'
+        url = '/pots'
         response = self._get(url)
         pot_list = response['pots']
         for p in pot_list:
