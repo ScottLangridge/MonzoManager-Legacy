@@ -12,9 +12,9 @@ def generate_state(size=20, chars=string.ascii_lowercase):
 class MonzoAccount:
     def __init__(self, token=''):
         with open('secrets.json') as f:
-            self.secrets = json.load(f)
+            self._secrets = json.load(f)
 
-        self.token = token
+        self._token = token
         if not self._token_is_valid():
             self._get_new_access_token()
 
@@ -23,7 +23,7 @@ class MonzoAccount:
         self._user_id = accounts['accounts'][0]['owners'][0]['user_id']
 
     def _get(self, url):
-        headers = {'Authorization': 'Bearer %s' % self.token}
+        headers = {'Authorization': 'Bearer %s' % self._token}
         response = requests.get(url, headers=headers)
         if response.status_code != 200:
             raise ConnectionError("%d - %s" % (response.status_code, response.reason))
@@ -32,7 +32,7 @@ class MonzoAccount:
             return content
 
     def _post(self, url, data):
-        headers = {'Authorization': 'Bearer %s' % self.token}
+        headers = {'Authorization': 'Bearer %s' % self._token}
         response = requests.post(url, data, headers=headers)
         if response.status_code != 200:
             raise ConnectionError("%d - %s" % (response.status_code, response.reason))
@@ -54,7 +54,7 @@ class MonzoAccount:
     def _get_new_access_token(self):
         state = generate_state()
         url = ('https://auth.monzo.com/?client_id=%s&redirect_uri=%s&response_type=code&state=%s'
-               % (self.secrets['client_id'], 'http://scottlangridge.com/', state))
+               % (self._secrets['client_id'], 'http://scottlangridge.com/', state))
 
         print('Navigate to the following address in your browser and verify your account:\n' + url)
         code = input('\nCopy the "code" section of the URL that you are redirected to and paste it here:\n')
@@ -63,16 +63,16 @@ class MonzoAccount:
         url = 'https://api.monzo.com/oauth2/token'
         data = {
             'grant_type': 'authorization_code',
-            'client_id': self.secrets['client_id'],
-            'client_secret': self.secrets['client_secret'],
+            'client_id': self._secrets['client_id'],
+            'client_secret': self._secrets['client_secret'],
             'redirect_uri': 'http://scottlangridge.com/',
             'code': code
         }
         response = requests.post(url, data)
         content = json.loads(response.content)
-        self.token = content['access_token']
+        self._token = content['access_token']
         input('\nApprove access in the Monzo app and then press enter.\n')
-        print('Access Token:\n' + self.token)
+        print('Access Token:\n' + self._token)
 
         if self._token_is_valid():
             print("\nAuthentication Completed\n")
