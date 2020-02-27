@@ -18,6 +18,10 @@ class MonzoAccount:
         if not self._token_is_valid():
             self._get_new_access_token()
 
+        accounts = self._get('https://api.monzo.com/accounts')
+        self._account_id = accounts['accounts'][0]['id']
+        self._user_id = accounts['accounts'][0]['owners'][0]['user_id']
+
     def _get(self, url):
         headers = {'Authorization': 'Bearer %s' % self.token}
         response = requests.get(url, headers=headers)
