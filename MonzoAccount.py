@@ -30,6 +30,7 @@ class MonzoAccount:
         self._account_id = account_list[0]['id']
         self._user_id = account_list[0]['owners'][0]['user_id']
 
+    # Performs the actual request that is sent to the Monzo API.
     def _api_call(self, verb, url, data=None):
         http_verbs = {
             'get': requests.get,
