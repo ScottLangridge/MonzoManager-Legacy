@@ -1,14 +1,15 @@
 import json
 import random
 import string
-
 import requests
 
 
+# Generates a random string for dedupe_ids and states etc.
 def generate_random_string(size=20, chars=string.ascii_lowercase):
     return ''.join(random.choice(chars) for _ in range(size))
 
 
+# Wrapper class for accessing a Monzo account through the Monzo API.
 class MonzoAccount:
     # Constructor. Optional parameter to set token without needing to generate it.
     def __init__(self, token='', refresh_token=''):
