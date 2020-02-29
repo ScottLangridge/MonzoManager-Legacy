@@ -5,7 +5,7 @@ import string
 import requests
 
 
-def generate_state(size=20, chars=string.ascii_lowercase):
+def generate_random_string(size=20, chars=string.ascii_lowercase):
     return ''.join(random.choice(chars) for _ in range(size))
 
 
@@ -28,7 +28,7 @@ class MonzoAccount:
         http_verbs = {
             'get': requests.get,
             'post': requests.post,
-            'put': requests.put
+            'put': requests.put,
         }
         request_url = 'https://api.monzo.com' + url
         headers = {'Authorization': 'Bearer %s' % self._token}
@@ -56,7 +56,7 @@ class MonzoAccount:
 
     # Guides the user through the process of setting up a new token.
     def _get_new_access_token(self):
-        state = generate_state()
+        state = generate_random_string()
         url = ('https://auth.monzo.com/?client_id=%s&redirect_uri=%s&response_type=code&state=%s'
                % (self._secrets['client_id'], 'http://scottlangridge.com/', state))
 
@@ -109,6 +109,16 @@ class MonzoAccount:
         url = '/balance?account_id=%s' % self._account_id
         return self._api_call('get', url)
 
+    # Gets pot_id of a pot given it's name.
+    def _get_pot_id_by_name(self, name):
+        url = '/pots'
+        response = self._api_call('get', url)
+        pot_list = response['pots']
+        for p in pot_list:
+            if p['name'].lower() == name.lower():
+                return p['id']
+        raise ValueError('No pot with the name "%s" was found.' % name)
+
     # Returns the balance in pence in the current account.
     def available_balance(self):
         balance = self._balance()
@@ -121,10 +131,23 @@ class MonzoAccount:
 
     # Returns the balance in pence of a given pot.
     def pot_balance(self, pot):
+        pot_id = self._get_pot_id_by_name(pot)
         url = '/pots'
         response = self._api_call('get', url)
         pot_list = response['pots']
         for p in pot_list:
-            if p['name'] == pot:
+            if p['id'] == pot_id:
                 return p['balance']
-        raise KeyError('Invalid pot name.')
+        raise ValueError('Pot could not be found.')
+
+    # Deposits a given amount (in pence) into a given pot from the available balance.
+    def deposit_to_pot(self, pot, amount):
+        pot_id = self._get_pot_id_by_name(pot)
+        dedupe_id = generate_random_string()
+        url = '/pots/%s/deposit' % pot_id
+        data = {
+            'source_account_id': self._account_id,
+            'amount': amount,
+            'dedupe_id': dedupe_id
+        }
+        self._api_call('put', url, data)
