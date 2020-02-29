@@ -14,7 +14,7 @@ class MonzoAccount:
     # Constructor. Optional parameter to set token without needing to generate it.
     def __init__(self, token='', refresh_token=''):
         # Load secrets.
-        with open('secrets.json') as f:
+        with open('data_dir/secrets.json') as f:
             self._secrets = json.load(f)
 
         # Fetch tokens.
