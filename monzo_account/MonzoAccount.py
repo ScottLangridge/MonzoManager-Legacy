@@ -13,10 +13,13 @@ def generate_random_string(size=20, chars=string.ascii_lowercase):
 class MonzoAccount:
     # Constructor. Optional parameter to set token without needing to generate it.
     def __init__(self):
-        # Load secrets.
+        # Load secrets and tokens.
         self._secrets_file = 'monzo_account/data_dir/secrets.json'
+        self._tokens_file = 'monzo_account/data_dir/tokens.json'
         with open(self._secrets_file) as f:
             self._secrets = json.load(f)
+        with open(self._tokens_file) as f:
+            self._tokens = json.load(f)
 
         # Fetch new tokens if needed.
         # Note: Refresh of token will be attempted if expired as part of _token_is_valid().
@@ -39,7 +42,7 @@ class MonzoAccount:
             'put': requests.put,
         }
         request_url = 'https://api.monzo.com' + url
-        headers = {'Authorization': 'Bearer %s' % self._secrets['access_token']}
+        headers = {'Authorization': 'Bearer %s' % self._tokens['access_token']}
         response = http_verbs[verb](request_url, data=data, headers=headers)
         content = json.loads(response.content)
 
@@ -81,13 +84,13 @@ class MonzoAccount:
             'code': code
         }
         response = self._api_call('post', url, data)
-        self._secrets['access_token'] = response['access_token']
-        self._secrets['refresh_token'] = response['refresh_token']
+        self._tokens['access_token'] = response['access_token']
+        self._tokens['refresh_token'] = response['refresh_token']
         input('\nApprove access in the Monzo app and then press enter.\n')
 
         print('Access Token Acquired.')
-        with open(self._secrets_file, 'w') as f:
-            f.write(json.dumps(self._secrets, sort_keys=True, indent=2, separators=(',', ': ')))
+        with open(self._tokens_file, 'w') as f:
+            f.write(json.dumps(self._tokens, sort_keys=True, indent=2, separators=(',', ': ')))
 
         if self._token_is_valid():
             print("\nAuthentication Completed.\n")
@@ -102,16 +105,16 @@ class MonzoAccount:
             'grant_type': 'refresh_token',
             'client_id': self._secrets['client_id'],
             'client_secret': self._secrets['client_secret'],
-            'refresh_token': self._secrets['refresh_token']
+            'refresh_token': self._tokens['refresh_token']
         }
         response = self._api_call('post', url, data)
-        self._secrets['access_token'] = response['access_token']
-        self._secrets['refresh_token'] = response['refresh_token']
+        self._tokens['access_token'] = response['access_token']
+        self._tokens['refresh_token'] = response['refresh_token']
         if not self._token_is_valid():
             raise AssertionError("Authentication token invalid!")
         else:
-            with open(self._secrets_file, 'w') as f:
-                f.write(json.dumps(self._secrets, sort_keys=True, indent=2, separators=(',', ': ')))
+            with open(self._tokens_file, 'w') as f:
+                f.write(json.dumps(self._tokens, sort_keys=True, indent=2, separators=(',', ': ')))
 
     # Calls the balance endpoint of the Monzo API.
     def _balance(self):
