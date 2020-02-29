@@ -1,5 +1,6 @@
-# Environment
+# Python
 __pycache__
+*.pyc
 .idea
 venv
 
