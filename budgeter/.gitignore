@@ -1,5 +1,0 @@
-# Ignore all json files as they may contain sensitive info
-*.json
-
-# Except templates
-!*.template.json
