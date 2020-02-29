@@ -21,8 +21,11 @@ class MonzoAccount:
             self._get_new_access_token()
 
         accounts = self._api_call('get', '/accounts')
-        self._account_id = accounts['accounts'][0]['id']
-        self._user_id = accounts['accounts'][0]['owners'][0]['user_id']
+        account_list = accounts['accounts']
+        if len(account_list) != 1:
+            raise AssertionError('MonzoAccount can currently only handle users with one account.')
+        self._account_id = account_list[0]['id']
+        self._user_id = account_list[0]['owners'][0]['user_id']
 
     def _api_call(self, verb, url, data=None):
         http_verbs = {
