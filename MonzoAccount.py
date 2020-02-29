@@ -11,11 +11,12 @@ def generate_state(size=20, chars=string.ascii_lowercase):
 
 class MonzoAccount:
     # Constructor. Optional parameter to set token without needing to generate it.
-    def __init__(self, token=''):
+    def __init__(self, token='', refresh_token=''):
         with open('secrets.json') as f:
             self._secrets = json.load(f)
 
         self._token = token
+        self._refresh_token = refresh_token
         if not self._token_is_valid():
             self._get_new_access_token()
 
@@ -25,25 +26,31 @@ class MonzoAccount:
 
     # Makes a get request to the Monzo API.
     def _get(self, url):
-        url = 'https://api.monzo.com' + url
+        request_url = 'https://api.monzo.com' + url
         headers = {'Authorization': 'Bearer %s' % self._token}
-        response = requests.get(url, headers=headers)
+        response = requests.get(request_url, headers=headers)
+        content = json.loads(response.content)
+
+        if response.status_code == 401 and content['code'] == 'unauthorized.bad_access_token.expired':
+            self._refresh_access_token()
+            return self._get(url)
         if response.status_code != 200:
             raise ConnectionError("%d - %s" % (response.status_code, response.reason))
-        else:
-            content = json.loads(response.content)
-            return content
+        return content
 
     # Makes a post request to the Monzo API.
     def _post(self, url, data):
-        url = 'https://api.monzo.com' + url
+        request_url = 'https://api.monzo.com' + url
         headers = {'Authorization': 'Bearer %s' % self._token}
-        response = requests.post(url, data, headers=headers)
+        response = requests.post(request_url, data, headers=headers)
+        content = json.loads(response.content)
+
+        if response.status_code == 401 and content['code'] == 'unauthorized.bad_access_token.expired':
+            self._refresh_access_token()
+            return self._post(url, data)
         if response.status_code != 200:
             raise ConnectionError("%d - %s" % (response.status_code, response.reason))
-        else:
-            content = json.loads(response.content)
-            return content
+        return content
 
     # Returns a boolean indicating whether of not the currently stored token is valid.
     def _token_is_valid(self):
@@ -75,17 +82,37 @@ class MonzoAccount:
             'redirect_uri': 'http://scottlangridge.com/',
             'code': code
         }
-        response = requests.post(url, data)
-        content = json.loads(response.content)
-        self._token = content['access_token']
+        response = self._post(url, data)
+        self._token = response['access_token']
+        self._refresh_token = response['refresh_token']
         input('\nApprove access in the Monzo app and then press enter.\n')
+        print('Access Token Acquired.')
         print('Access Token:\n' + self._token)
+        print('Refresh Token:\n' + self._refresh_token)
 
         if self._token_is_valid():
-            print("\nAuthentication Completed\n")
+            print("\nAuthentication Completed.\n")
         else:
-            print("\nAuthentication Error\n")
+            print("\nAuthentication Error.\n")
             raise AssertionError("Authentication token invalid!")
+
+    # Refresh an expired authentication token
+    def _refresh_access_token(self):
+        url = '/oauth2/token'
+        data = {
+            'grant_type': 'refresh_token',
+            'client_id': self._secrets['client_id'],
+            'client_secret': self._secrets['client_secret'],
+            'refresh_token': self._refresh_token
+        }
+        response = self._post(url, data)
+        self._token = response['access_token']
+        self._refresh_token = response['refresh_token']
+        if not self._token_is_valid():
+            raise AssertionError("Authentication token invalid!")
+        else:
+            print('Authentication Token Refreshed.\nNew Token: \n%s\nNew Refresh Token: \n%s\n'
+                  % (self._token, self._refresh_token))
 
     # Calls the balance endpoint of the Monzo API.
     def _balance(self):
