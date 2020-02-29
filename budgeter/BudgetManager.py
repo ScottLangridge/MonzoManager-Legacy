@@ -5,7 +5,7 @@ from monzo_account.MonzoAccount import MonzoAccount
 
 # Controls the process of running budgets.
 class BudgetManager:
-    budget_file = 'budgeter/data_dir/budgets.json'
+    budget_file = 'budgeter/data_dir/budget.json'
 
     def __init__(self):
         self.monzo = MonzoAccount()
