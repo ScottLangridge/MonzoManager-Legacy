@@ -12,14 +12,17 @@ def generate_random_string(size=20, chars=string.ascii_lowercase):
 class MonzoAccount:
     # Constructor. Optional parameter to set token without needing to generate it.
     def __init__(self, token='', refresh_token=''):
+        # Load secrets.
         with open('secrets.json') as f:
             self._secrets = json.load(f)
 
+        # Fetch tokens.
         self._token = token
         self._refresh_token = refresh_token
         if not self._token_is_valid():
             self._get_new_access_token()
 
+        # Fetch account details.
         accounts = self._api_call('get', '/accounts')
         account_list = accounts['accounts']
         if len(account_list) != 1:
