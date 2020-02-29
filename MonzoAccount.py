@@ -163,3 +163,29 @@ class MonzoAccount:
             'dedupe_id': dedupe_id
         }
         self._api_call('put', url, data)
+
+    # Creates a new feed item in the user's app.
+    def notify(self, title, body=None, bg_colour=None, title_colour=None, body_colour=None, image=None, link_url=None):
+        url = '/feed'
+        if image is None:
+            image = 'https://cdn.pixabay.com/photo/2017/10/24/00/39/bot-icon-2883144_960_720.png'
+        data = {
+            'account_id': self._account_id,
+            'type': 'basic',
+            'params[title]': title,
+            'params[body]': body,
+            'params[image_url]': image,
+            'params[background_color]': bg_colour,
+            'params[body_color]': body_colour,
+            'params[title_color]': title_colour,
+            'url': link_url
+        }
+
+        # Remove empty values from data.
+        empties = []
+        for i in data:
+            if data[i] is None:
+                empties.append(i)
+        [data.pop(i) for i in empties]
+
+        self._api_call('post', url, data)
