@@ -3,6 +3,7 @@ import json
 from monzo_account.MonzoAccount import MonzoAccount
 
 
+# Controls the process of running budgets.
 class BudgetManager:
     def __init__(self, budget_file='weekley_budgeter/data_dir/budget.json'):
         # The JSON file containing the budget data.
