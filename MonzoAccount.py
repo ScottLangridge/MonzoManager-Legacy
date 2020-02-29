@@ -151,3 +151,15 @@ class MonzoAccount:
             'dedupe_id': dedupe_id
         }
         self._api_call('put', url, data)
+
+    # Deposits a given amount (in pence) into a given pot from the available balance.
+    def withdraw_from_pot(self, pot, amount):
+        pot_id = self._get_pot_id_by_name(pot)
+        dedupe_id = generate_random_string()
+        url = '/pots/%s/withdraw' % pot_id
+        data = {
+            'destination_account_id': self._account_id,
+            'amount': amount,
+            'dedupe_id': dedupe_id
+        }
+        self._api_call('put', url, data)
