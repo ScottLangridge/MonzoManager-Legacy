@@ -4,9 +4,9 @@ from monzo_account.MonzoAccount import MonzoAccount
 
 
 class BudgetManager:
-    def __init__(self):
+    def __init__(self, budget_file='weekley_budgeter/data_dir/budget.json'):
         # The JSON file containing the budget data.
-        self.budget_file = 'weekley_budgeter/data_dir/budget.json'
+        self.budget_file = budget_file
         self.monzo = MonzoAccount()
 
         # Components of a budget:
