@@ -20,34 +20,24 @@ class MonzoAccount:
         if not self._token_is_valid():
             self._get_new_access_token()
 
-        accounts = self._get('/accounts')
+        accounts = self._api_call('get', '/accounts')
         self._account_id = accounts['accounts'][0]['id']
         self._user_id = accounts['accounts'][0]['owners'][0]['user_id']
 
-    # Makes a get request to the Monzo API.
-    def _get(self, url):
+    def _api_call(self, verb, url, data=None):
+        http_verbs = {
+            'get': requests.get,
+            'post': requests.post,
+            'put': requests.put
+        }
         request_url = 'https://api.monzo.com' + url
         headers = {'Authorization': 'Bearer %s' % self._token}
-        response = requests.get(request_url, headers=headers)
+        response = http_verbs[verb](request_url, data=data, headers=headers)
         content = json.loads(response.content)
 
         if response.status_code == 401 and content['code'] == 'unauthorized.bad_access_token.expired':
             self._refresh_access_token()
-            return self._get(url)
-        if response.status_code != 200:
-            raise ConnectionError("%d - %s" % (response.status_code, response.reason))
-        return content
-
-    # Makes a post request to the Monzo API.
-    def _post(self, url, data):
-        request_url = 'https://api.monzo.com' + url
-        headers = {'Authorization': 'Bearer %s' % self._token}
-        response = requests.post(request_url, data, headers=headers)
-        content = json.loads(response.content)
-
-        if response.status_code == 401 and content['code'] == 'unauthorized.bad_access_token.expired':
-            self._refresh_access_token()
-            return self._post(url, data)
+            return self._api_call('get', url)
         if response.status_code != 200:
             raise ConnectionError("%d - %s" % (response.status_code, response.reason))
         return content
@@ -56,7 +46,7 @@ class MonzoAccount:
     def _token_is_valid(self):
         url = '/ping/whoami'
         try:
-            response = self._get(url)
+            response = self._api_call('get', url)
         except ConnectionError as ex:
             if ex.args[0] == '401 - Unauthorized':
                 return False
@@ -82,7 +72,7 @@ class MonzoAccount:
             'redirect_uri': 'http://scottlangridge.com/',
             'code': code
         }
-        response = self._post(url, data)
+        response = self._api_call('post', url, data)
         self._token = response['access_token']
         self._refresh_token = response['refresh_token']
         input('\nApprove access in the Monzo app and then press enter.\n')
@@ -97,7 +87,7 @@ class MonzoAccount:
             raise AssertionError("Authentication token invalid!")
 
     # Refresh an expired authentication token
-    def _refresh_access_token(self):
+    def refresh_access_token(self):
         url = '/oauth2/token'
         data = {
             'grant_type': 'refresh_token',
@@ -105,7 +95,7 @@ class MonzoAccount:
             'client_secret': self._secrets['client_secret'],
             'refresh_token': self._refresh_token
         }
-        response = self._post(url, data)
+        response = self._api_call('post', url, data)
         self._token = response['access_token']
         self._refresh_token = response['refresh_token']
         if not self._token_is_valid():
@@ -117,7 +107,7 @@ class MonzoAccount:
     # Calls the balance endpoint of the Monzo API.
     def _balance(self):
         url = '/balance?account_id=%s' % self._account_id
-        return self._get(url)
+        return self._api_call('get', url)
 
     # Returns the balance in pence in the current account.
     def available_balance(self):
@@ -132,7 +122,7 @@ class MonzoAccount:
     # Returns the balance in pence of a given pot.
     def pot_balance(self, pot):
         url = '/pots'
-        response = self._get(url)
+        response = self._api_call('get', url)
         pot_list = response['pots']
         for p in pot_list:
             if p['name'] == pot:
