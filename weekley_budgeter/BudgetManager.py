@@ -1,6 +1,6 @@
 import json
 
-from MonzoAccount import MonzoAccount
+from monzo_account.MonzoAccount import MonzoAccount
 
 
 class BudgetManager:
