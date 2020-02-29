@@ -1,0 +1,7 @@
+{
+  "active": true,
+  "budget": 9000,
+  "buffer": 10000,
+  "current_net": 0,
+  "schedule_expression": "schedule.every().saturday.at('00:00')"
+}

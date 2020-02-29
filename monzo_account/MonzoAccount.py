@@ -99,7 +99,7 @@ class MonzoAccount:
             raise AssertionError("Authentication token invalid!")
 
     # Refresh an expired authentication token
-    def refresh_access_token(self):
+    def _refresh_access_token(self):
         url = '/oauth2/token'
         data = {
             'grant_type': 'refresh_token',
