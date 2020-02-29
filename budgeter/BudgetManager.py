@@ -47,7 +47,7 @@ class BudgetManager:
         with open(self.budget_file, 'w') as f:
             f.write(json.dumps(json_data, sort_keys=True, indent=2, separators=(',', ': ')))
 
-    # Tops up account from savings pot and updates current_net as appropriate.
+    # Tops up account from the Accessible Funds pot and updates current_net as appropriate.
     # Should only ever be called by the schedule expression in the budget JSON file.
     def update(self):
         # Fetch data
@@ -60,7 +60,7 @@ class BudgetManager:
 
         # Action Updates
         self.current_net += current_net_change
-        self.monzo.withdraw_from_pot('savings', to_transfer)
+        self.monzo.withdraw_from_pot('accessible funds', to_transfer)
 
         # Save data
         self._save_budget_file()
