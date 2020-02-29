@@ -5,7 +5,7 @@ from monzo_account.MonzoAccount import MonzoAccount
 
 # Controls the process of running budgets.
 class BudgetManager:
-    def __init__(self, budget_file='weekley_budgeter/data_dir/budget.json'):
+    def __init__(self, budget_file='budgeter/data_dir/budget.json'):
         # The JSON file containing the budget data.
         self.budget_file = budget_file
         self.monzo = MonzoAccount()
@@ -30,13 +30,13 @@ class BudgetManager:
         with open(self.budget_file) as f:
             json_data = json.loads(f.read())
         self.buffer = json_data['buffer']
-        self.budget = json_data['weekly_budget']
+        self.budget = json_data['budget']
         self.current_net = json_data['current_net']
 
     def save_budget_file(self):
         json_data = {
             'buffer': self.buffer,
-            'weekly_budget': self.budget,
+            'budget': self.budget,
             'current_net': self.current_net,
         }
         with open(self.budget_file, 'w') as f:
