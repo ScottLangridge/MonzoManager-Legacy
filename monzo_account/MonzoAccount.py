@@ -42,7 +42,13 @@ class MonzoAccount:
             'put': requests.put,
         }
         request_url = 'https://api.monzo.com' + url
-        headers = {'Authorization': 'Bearer %s' % self._tokens['access_token']}
+
+        # Calls to /oauth2/token (e.g. when refreshing a token) do not work if you send an bearer token.
+        if url == "/oauth2/token":
+            headers = {}
+        else:
+            headers = {'Authorization': 'Bearer %s' % self._tokens['access_token']}
+
         response = http_verbs[verb](request_url, data=data, headers=headers)
         content = json.loads(response.content)
 
