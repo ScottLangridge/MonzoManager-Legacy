@@ -1,5 +1,14 @@
+# Python
+__pycache__
+*.pyc
 .idea
 venv
-secrets.json
-__pycache__
+
+# Debug file
 debug.py
+
+# Ignore all json files as they may contain sensitive info
+*.json
+
+# Except templates
+!*.template.json
