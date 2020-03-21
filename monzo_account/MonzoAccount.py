@@ -41,7 +41,7 @@ class MonzoAccount:
         self._user_id = account_list[0]['owners'][0]['user_id']
 
     # Performs the actual request that is sent to the Monzo API.
-    def _api_call(self, verb, url, data=None):
+    def _api_call(self, verb, url, params=None, data=None):
         http_verbs = {
             'get': requests.get,
             'post': requests.post,
@@ -56,8 +56,8 @@ class MonzoAccount:
             token = self._tokens['access_token']
             headers = {'Authorization': f'Bearer {token}'}
 
-        self._log.debug(f'API Call. URL: {request_url} Data:{data}')
-        response = http_verbs[verb](request_url, data=data, headers=headers)
+        self._log.debug(f'API Call. URL: {request_url} Params: {params} Data:{data}')
+        response = http_verbs[verb](request_url, headers=headers, params=params, data=data)
         content = json.loads(response.content)
 
         if response.status_code == 401 and content['code'] == 'unauthorized.bad_access_token.expired':
@@ -98,7 +98,7 @@ class MonzoAccount:
             'redirect_uri': 'http://scottlangridge.com/',
             'code': code
         }
-        response = self._api_call('post', url, data)
+        response = self._api_call('post', url, data=data)
         self._tokens['access_token'] = response['access_token']
         self._tokens['refresh_token'] = response['refresh_token']
         input('\nApprove access in the Monzo app and then press enter.\n')
@@ -122,7 +122,7 @@ class MonzoAccount:
             'client_secret': self._secrets['client_secret'],
             'refresh_token': self._tokens['refresh_token']
         }
-        response = self._api_call('post', url, data)
+        response = self._api_call('post', url, data=data)
         self._tokens['access_token'] = response['access_token']
         self._tokens['refresh_token'] = response['refresh_token']
         if not self._token_is_valid():
@@ -183,7 +183,7 @@ class MonzoAccount:
             'amount': amount,
             'dedupe_id': dedupe_id
         }
-        self._api_call('put', url, data)
+        self._api_call('put', url, data=data)
 
     # Withdraw a given amount (in pence) from a pot to the available balance.
     def withdraw_from_pot(self, pot, amount):
@@ -198,7 +198,7 @@ class MonzoAccount:
             'amount': amount,
             'dedupe_id': dedupe_id
         }
-        self._api_call('put', url, data)
+        self._api_call('put', url, data=data)
 
     # Calls withdraw_from_pot or deposit_to_pot as appropriate based on the amount.
     # Withdraws if amount is -ve, deposits if amount is +ve.
