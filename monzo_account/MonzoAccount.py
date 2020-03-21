@@ -170,7 +170,7 @@ class MonzoAccount:
         }
         self._api_call('put', url, data)
 
-    # Deposits a given amount (in pence) into a given pot from the available balance.
+    # Withdraw a given amount (in pence) from a pot to the available balance.
     def withdraw_from_pot(self, pot, amount):
         pot_id = self._get_pot_id_by_name(pot)
         dedupe_id = generate_random_string()
