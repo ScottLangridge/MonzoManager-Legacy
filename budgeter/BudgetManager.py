@@ -60,7 +60,7 @@ class BudgetManager:
 
         # Action Updates
         self.current_net += current_net_change
-        self.monzo.withdraw_from_pot('accessible funds', to_transfer)
+        self.monzo.pot_transfer('accessible funds', to_transfer)
 
         # Save data
         self._save_budget_file()

@@ -193,6 +193,16 @@ class MonzoAccount:
         }
         self._api_call('put', url, data)
 
+    # Calls withdraw_from_pot or deposit_to_pot as appropriate based on the amount.
+    # Withdraws if amount is -ve, deposits if amount is +ve.
+    def pot_transfer(self, pot, amount):
+        if amount > 0:
+            self.withdraw_from_pot(amount, pot)
+        elif amount < 0:
+            self.deposit_to_pot(abs(amount), pot)
+        else:
+            return
+
     # Creates a new feed item in the user's app.
     def notify(self, title, body=None, bg_colour=None, title_colour=None, body_colour=None, image=None, link_url=None):
         if title is None:
