@@ -1,4 +1,5 @@
 import schedule
+import logging
 import json
 import time
 
@@ -6,6 +7,13 @@ from budgeter.BudgetManager import BudgetManager
 
 
 def main():
+    # Set up logging
+    logging.basicConfig(filename='MonzoManager.log',
+                        filemode='a+',
+                        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                        level=logging.DEBUG)
+    logging.info('--------------------- MONZO MANAGER STARTED ---------------------')
+
     # Initialise and schedule each component.
     budget_manager = initialise_budget()
 

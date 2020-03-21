@@ -7,8 +7,9 @@ venv
 # Debug file
 debug.py
 
-# Ignore all json files as they may contain sensitive info
+# Ignore all json and logs files as they may contain sensitive info
 *.json
+*.log
 
 # Except templates
 !*.template.json

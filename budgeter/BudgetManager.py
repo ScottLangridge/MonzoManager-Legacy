@@ -1,3 +1,4 @@
+import logging
 import json
 
 from monzo_account.MonzoAccount import MonzoAccount
@@ -8,6 +9,10 @@ class BudgetManager:
     budget_file = 'budgeter/data_dir/budget.json'
 
     def __init__(self):
+        # Set up logging
+        self._log = logging.getLogger("BudgetManger")
+
+        # Set up API access
         self.monzo = MonzoAccount()
 
         # Components of a budget:
@@ -50,16 +55,23 @@ class BudgetManager:
     # Tops up account from the Accessible Funds pot and updates current_net as appropriate.
     # Should only ever be called by the schedule expression in the budget JSON file.
     def update(self):
+        self._log.info('Updating budget.')
+        self._log.debug(f'Old Net: {self.current_net}')
+
         # Fetch data
         self._load_budget_file()
         balance = self.monzo.available_balance()
+        self._log.debug(f'Available Balance: {balance}')
 
         # Calculate derived data
-        current_net_change = balance - self.buffer
+        net_change = balance - self.buffer
         to_transfer = (self.buffer + self.budget) - balance
+        self._log.debug(f'Net Change: {net_change}')
+        self._log.debug(f'To Transfer: {to_transfer}')
 
         # Action Updates
-        self.current_net += current_net_change
+        self.current_net += net_change
+        self._log.debug(f'New Net: {self.current_net}')
         self.monzo.pot_transfer('accessible funds', to_transfer)
 
         # Save data

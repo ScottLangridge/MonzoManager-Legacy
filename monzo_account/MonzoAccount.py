@@ -2,6 +2,7 @@ import json
 import random
 import string
 import requests
+import logging
 
 
 # Generates a random string for dedupe_ids and states etc.
@@ -13,6 +14,10 @@ def generate_random_string(size=20, chars=string.ascii_lowercase):
 class MonzoAccount:
     # Constructor. Optional parameter to set token without needing to generate it.
     def __init__(self):
+        # Set up logger
+        self._log = logging.getLogger('MonzoAccount')
+        self._log.info('New MonzoAccount Initialised')
+
         # Load secrets and tokens.
         self._secrets_file = 'monzo_account/data_dir/secrets.json'
         self._tokens_file = 'monzo_account/data_dir/tokens.json'
@@ -24,6 +29,7 @@ class MonzoAccount:
         # Fetch new tokens if needed.
         # Note: Refresh of token will be attempted if expired as part of _token_is_valid().
         if not self._token_is_valid():
+            self._log.info("Invalid token detected. Fetching new token.")
             self._get_new_access_token()
 
         # Fetch account details.
@@ -50,6 +56,7 @@ class MonzoAccount:
             token = self._tokens['access_token']
             headers = {'Authorization': f'Bearer {token}'}
 
+        self._log.debug(f'API Call. URL: {request_url} Data:{data}')
         response = http_verbs[verb](request_url, data=data, headers=headers)
         content = json.loads(response.content)
 
@@ -205,6 +212,8 @@ class MonzoAccount:
 
     # Creates a new feed item in the user's app.
     def notify(self, title, body=None, bg_colour=None, title_colour=None, body_colour=None, image=None, link_url=None):
+        self._log.info(f'Sending Notification. Title: {title}, Body: {body}')
+
         if title is None:
             raise ValueError('Notification title cannot be None.')
         if title == '':
