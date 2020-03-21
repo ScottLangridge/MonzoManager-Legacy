@@ -197,9 +197,9 @@ class MonzoAccount:
     # Withdraws if amount is -ve, deposits if amount is +ve.
     def pot_transfer(self, pot, amount):
         if amount > 0:
-            self.withdraw_from_pot(amount, pot)
+            self.withdraw_from_pot(pot, amount)
         elif amount < 0:
-            self.deposit_to_pot(abs(amount), pot)
+            self.deposit_to_pot(pot, abs(amount))
         else:
             return
 
