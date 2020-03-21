@@ -241,4 +241,14 @@ class MonzoAccount:
                 empties.append(i)
         [data.pop(i) for i in empties]
 
-        self._api_call('post', url, data)
+        self._api_call('post', url, data=data)
+
+    # Returns a list of the webhooks registered on the account
+    def list_webhooks(self):
+        self._log.info('Fetching active webhooks.')
+
+        url = '/webhooks'
+        params = {
+            'account_id': self._account_id
+        }
+        webhooks = self._api_call('get', url, params=params)['webhooks']
