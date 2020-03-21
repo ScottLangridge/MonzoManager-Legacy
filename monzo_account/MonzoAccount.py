@@ -73,9 +73,10 @@ class MonzoAccount:
 
     # Guides the user through the process of setting up a new token.
     def _get_new_access_token(self):
-        state = generate_random_string()
-        url = ('https://auth.monzo.com/?client_id=%s&redirect_uri=%s&response_type=code&state=%s'
-               % (self._secrets['client_id'], 'http://scottlangridge.com/', state))
+        url = (f'https://auth.monzo.com/?'
+               f'client_id={self._secrets["client_id"]}'
+               f'&redirect_uri=http://scottlangridge.com/'
+               f'&response_type=code&state={generate_random_string()}')
 
         print('Navigate to the following address in your browser and verify your account:\n' + url)
         code = input('\nCopy the "code" section of the URL that you are redirected to and paste it here:\n')
@@ -124,7 +125,7 @@ class MonzoAccount:
 
     # Calls the balance endpoint of the Monzo API.
     def _balance(self):
-        url = '/balance?account_id=%s' % self._account_id
+        url = f'/balance?account_id={self._account_id}'
         return self._api_call('get', url)
 
     # Gets pot_id of a pot given it's name.
@@ -135,7 +136,7 @@ class MonzoAccount:
         for p in pot_list:
             if p['name'].lower() == name.lower():
                 return p['id']
-        raise ValueError('No pot with the name "%s" was found.' % name)
+        raise ValueError(f'No pot with the name "{name}" was found.')
 
     # Returns the balance in pence in the current account.
     def available_balance(self):
@@ -162,7 +163,7 @@ class MonzoAccount:
     def deposit_to_pot(self, pot, amount):
         pot_id = self._get_pot_id_by_name(pot)
         dedupe_id = generate_random_string()
-        url = '/pots/%s/deposit' % pot_id
+        url = f'/pots/{pot_id}/deposit'
         data = {
             'source_account_id': self._account_id,
             'amount': amount,
@@ -174,7 +175,7 @@ class MonzoAccount:
     def withdraw_from_pot(self, pot, amount):
         pot_id = self._get_pot_id_by_name(pot)
         dedupe_id = generate_random_string()
-        url = '/pots/%s/withdraw' % pot_id
+        url = f'/pots/{pot_id}/withdraw'
         data = {
             'destination_account_id': self._account_id,
             'amount': amount,
