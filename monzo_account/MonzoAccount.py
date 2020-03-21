@@ -47,7 +47,8 @@ class MonzoAccount:
         if url == "/oauth2/token":
             headers = {}
         else:
-            headers = {'Authorization': 'Bearer %s' % self._tokens['access_token']}
+            token = self._tokens['access_token']
+            headers = {'Authorization': f'Bearer {token}'}
 
         response = http_verbs[verb](request_url, data=data, headers=headers)
         content = json.loads(response.content)
@@ -56,7 +57,7 @@ class MonzoAccount:
             self._refresh_access_token()
             return self._api_call('get', url)
         if response.status_code != 200:
-            raise ConnectionError("%d - %s" % (response.status_code, response.reason))
+            raise ConnectionError(f'{response.status_code} - {response.reason}')
         return content
 
     # Returns a boolean indicating whether of not the currently stored token is valid.
