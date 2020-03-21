@@ -151,6 +151,9 @@ class MonzoAccount:
 
     # Returns the balance in pence of a given pot.
     def pot_balance(self, pot):
+        if type(pot) != string:
+            raise TypeError('Pot argument must be a string.')
+
         pot_id = self._get_pot_id_by_name(pot)
         url = '/pots'
         response = self._api_call('get', url)
@@ -162,6 +165,9 @@ class MonzoAccount:
 
     # Deposits a given amount (in pence) into a given pot from the available balance.
     def deposit_to_pot(self, pot, amount):
+        if amount <= 0:
+            raise ValueError('Deposits must have an amount greater than zero.')
+
         pot_id = self._get_pot_id_by_name(pot)
         dedupe_id = generate_random_string()
         url = f'/pots/{pot_id}/deposit'
@@ -174,6 +180,9 @@ class MonzoAccount:
 
     # Withdraw a given amount (in pence) from a pot to the available balance.
     def withdraw_from_pot(self, pot, amount):
+        if amount <= 0:
+            raise ValueError('Withdraws must have an amount greater than zero.')
+
         pot_id = self._get_pot_id_by_name(pot)
         dedupe_id = generate_random_string()
         url = f'/pots/{pot_id}/withdraw'
@@ -186,6 +195,11 @@ class MonzoAccount:
 
     # Creates a new feed item in the user's app.
     def notify(self, title, body=None, bg_colour=None, title_colour=None, body_colour=None, image=None, link_url=None):
+        if title is None:
+            raise ValueError('Notification title cannot be None.')
+        if title == '':
+            raise ValueError('Notification title cannot be the empty string.')
+
         url = '/feed'
         if image is None:
             image = 'https://cdn.pixabay.com/photo/2017/10/24/00/39/bot-icon-2883144_960_720.png'
