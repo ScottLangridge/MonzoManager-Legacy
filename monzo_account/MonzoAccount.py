@@ -46,6 +46,7 @@ class MonzoAccount:
             'get': requests.get,
             'post': requests.post,
             'put': requests.put,
+            'delete': requests.delete
         }
         request_url = 'https://api.monzo.com' + url
 
@@ -243,6 +244,19 @@ class MonzoAccount:
 
         self._api_call('post', url, data=data)
 
+    # Gets the webhook id from the url.
+    def _get_webhook_id(self, webhook_url):
+        self._log.info(f'Getting webhook id for {webhook_url}')
+
+        if webhook_url is None or webhook_url == '':
+            raise ValueError('Url cannot be None or the empty string.')
+
+        webhooks = self.list_webhooks()
+        for webhook in webhooks:
+            if webhook['url'] == webhook_url:
+                return webhook['id']
+        raise ValueError(f'No webhook with the url: {webhook_url} exists.')
+
     # Returns a list of the webhooks registered on the account
     def list_webhooks(self):
         self._log.info('Fetching active webhooks.')
@@ -252,3 +266,55 @@ class MonzoAccount:
             'account_id': self._account_id
         }
         webhooks = self._api_call('get', url, params=params)['webhooks']
+        return webhooks
+
+    # Checks if a webhook exists based off of either the url.
+    def webhook_exists(self, webhook_url):
+        self._log.info(f'Checking for existence of webhook: {webhook_url} by URL.')
+
+        if webhook_url is None or webhook_url == '':
+            raise ValueError('URL cannot be None or the empty string.')
+
+        webhooks = self.list_webhooks()
+        for webhook in webhooks:
+            if webhook['url'] == webhook_url:
+                return True
+        return False
+
+    # Registers a new webhook
+    def register_webhook(self, webhook_url):
+        self._log.info(f'Registering webhook: {webhook_url}.')
+
+        if webhook_url is None or webhook_url == '':
+            raise ValueError('Webhook URL cannot be None or the empty string.')
+
+        if self.webhook_exists(webhook_url):
+            raise ValueError(f'Webhook already exits for URL: {webhook_url}.')
+
+        url = '/webhooks'
+        data = {
+            'account_id': self._account_id,
+            'url': webhook_url
+        }
+        self._api_call('post', url, data=data)
+
+    # Deletes a webhook
+    def delete_webhook(self, webhook_url):
+        self._log.info(f'Deleting webhook: {webhook_url}.')
+
+        if not self.webhook_exists(webhook_url):
+            raise ValueError(f'Webhook: {webhook_url} does not exist.')
+
+        webhook_id = self._get_webhook_id(webhook_url)
+        if webhook_id is None or webhook_id == '':
+            raise ValueError('Webhook id cannot be None or the empty string.')
+
+        url = f'/webhooks/{webhook_id}'
+        self._api_call('delete', url)
+
+    # Deletes all webhooks
+    def clear_webhooks(self):
+        self._log.info('Clearing webhooks.')
+
+        webhooks = self.list_webhooks()
+        [self.delete_webhook(x['url']) for x in webhooks]
