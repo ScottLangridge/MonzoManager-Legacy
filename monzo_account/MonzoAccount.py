@@ -318,3 +318,29 @@ class MonzoAccount:
 
         webhooks = self.list_webhooks()
         [self.delete_webhook(x['url']) for x in webhooks]
+
+    # Lists all transactions available for an account.
+    # (Note: Only the most recent 90 days are available five mins after authentication.
+    def list_transactions(self):
+        self._log.info('Listing transactions.')
+
+        url = '/transactions'
+        params = {'account_id': self._account_id}
+
+        return self._api_call('get', url, params)
+
+    # Fetches information about a transaction
+    def retrieve_transaction(self, transaction_id, expand_merchant=False):
+        self._log.info(f'Retrieving Transaction: {transaction_id}.')
+
+        if transaction_id is None or transaction_id == '':
+            raise ValueError('Transaction ID cannot be None or the empty string.')
+
+        url = f'/transactions/{transaction_id}'
+
+        if expand_merchant:
+            params = {'expand[]': 'merchant'}
+        else:
+            params = []
+
+        return self._api_call('get', url, params)
