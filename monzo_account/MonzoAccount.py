@@ -136,11 +136,15 @@ class MonzoAccount:
         url = f'/balance?account_id={self._account_id}'
         return self._api_call('get', url)
 
+    # Lists pots
+    def _list_pots(self):
+        url = f'/pots?current_account_id={self._account_id}'
+        response = self._api_call('get', url)
+        return response['pots']
+
     # Gets pot_id of a pot given it's name.
     def _get_pot_id_by_name(self, name):
-        url = '/pots'
-        response = self._api_call('get', url)
-        pot_list = response['pots']
+        pot_list = self._list_pots()
         for p in pot_list:
             if p['name'].lower() == name.lower():
                 return p['id']
