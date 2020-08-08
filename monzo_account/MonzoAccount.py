@@ -40,6 +40,9 @@ class MonzoAccount:
         self._account_id = account_list[0]['id']
         self._user_id = account_list[0]['owners'][0]['user_id']
 
+        # Notify that new connection opened
+        self.notify('Monzo Manager has connected to your account')
+
     # Performs the actual request that is sent to the Monzo API.
     def _api_call(self, verb, url, data=None):
         http_verbs = {
