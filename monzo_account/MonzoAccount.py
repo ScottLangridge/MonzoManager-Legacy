@@ -134,14 +134,15 @@ class MonzoAccount:
 
     # Calls the balance endpoint of the Monzo API.
     def _balance(self):
-        url = f'/balance'
+        url = '/balance'
         params = {'account_id': self._account_id}
         return self._api_call('get', url, params)
 
     # Lists pots
     def _list_pots(self):
-        url = f'/pots?current_account_id={self._account_id}'
-        response = self._api_call('get', url)
+        url = '/pots'
+        params = {'current_account_id': self._account_id}
+        response = self._api_call('get', url, params)
         return response['pots']
 
     # Gets pot_id of a pot given it's name.
