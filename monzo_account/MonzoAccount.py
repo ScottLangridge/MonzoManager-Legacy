@@ -160,9 +160,6 @@ class MonzoAccount:
 
     # Returns the balance in pence of a given pot.
     def pot_balance(self, pot):
-        if type(pot) != string:
-            raise TypeError('Pot argument must be a string.')
-
         pot_id = self._get_pot_id_by_name(pot)
         url = '/pots'
         response = self._api_call('get', url)
@@ -344,4 +341,5 @@ class MonzoAccount:
         else:
             params = []
 
-        return self._api_call('get', url, params)
+        raw_json = self._api_call('get', url, params)
+        return raw_json['transaction']

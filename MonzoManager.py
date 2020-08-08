@@ -4,6 +4,7 @@ import json
 import time
 
 from budgeter.BudgetManager import BudgetManager
+from salary_sorter.TransactionListener import TransactionListener
 
 
 def main():
@@ -16,11 +17,15 @@ def main():
 
     # Initialise and schedule each component.
     budget_manager = initialise_budget()
+    salary_sorter = TransactionListener()
 
     # Print components.
     print('INITIALISATION COMPLETED\n\nACTIVE COMPONENTS:')
     if budget_manager:
         print('Budget Manager - %s' % budget_manager.schedule_expression)
+
+    if salary_sorter:
+        print('Salary Sorter')
 
     # Running schedule on infinite loop.
     print('\nRUNNING...')
