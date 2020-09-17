@@ -13,7 +13,7 @@ def generate_random_string(size=20, chars=string.ascii_lowercase):
 # Wrapper class for accessing a Monzo account through the Monzo API.
 class MonzoAccount:
     # Constructor. Optional parameter to set token without needing to generate it.
-    def __init__(self):
+    def __init__(self, notify=True):
         # Set up logger
         self._log = logging.getLogger('MonzoAccount')
         self._log.info('New MonzoAccount Initialised')
@@ -41,7 +41,8 @@ class MonzoAccount:
         self._user_id = account_list[0]['owners'][0]['user_id']
 
         # Notify that new connection opened
-        self.notify('Monzo Manager has connected to your account')
+        if notify:
+            self.notify('Monzo Manager has connected to your account')
 
     # Performs the actual request that is sent to the Monzo API.
     def _api_call(self, verb, url, data=None):
